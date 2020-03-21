@@ -10,7 +10,6 @@ use WP2Static\WsLog;
 class Deployer {
 
     public function upload_files( string $processed_site_path ) : void {
-        // check if dir exists
         if ( ! is_dir( $processed_site_path ) ) {
             return;
         }
