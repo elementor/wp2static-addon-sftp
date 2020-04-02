@@ -23,8 +23,10 @@ class Deployer {
             Controller::getValue( 'password' )
         ) {
             $username = Controller::getValue( 'username' );
-            $password =
-                 Controller::encrypt_decrypt( 'decrypt', Controller::getValue( 'password' ) );
+            $password = \WP2Static\Controller::encrypt_decrypt(
+                'decrypt',
+                Controller::getValue( 'password' )
+            );
 
             if ( ! $connection->login( $username, $password ) ) {
                 WsLog::l( 'Failed to login to sFTP with credentials provided (user/pass)' );

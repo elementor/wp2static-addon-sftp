@@ -72,7 +72,7 @@
                     name="<?php echo $view['options']['password']->name; ?>"
                     type="password"
                     value="<?php echo $view['options']['password']->value !== '' ?
-                        \WP2StaticSFTP\Controller::encrypt_decrypt('decrypt', $view['options']['password']->value) :
+                        \WP2Static\Controller::encrypt_decrypt('decrypt', $view['options']['password']->value) :
                         ''; ?>"
                 />
             </td>
@@ -106,7 +106,7 @@
                     name="<?php echo $view['options']['passphrase']->name; ?>"
                     type="password"
                     value="<?php echo $view['options']['passphrase']->value !== '' ?
-                        \WP2StaticSFTP\Controller::encrypt_decrypt('decrypt', $view['options']['passphrase']->value) :
+                        \WP2Static\Controller::encrypt_decrypt('decrypt', $view['options']['passphrase']->value) :
                         ''; ?>"
                 />
             </td>

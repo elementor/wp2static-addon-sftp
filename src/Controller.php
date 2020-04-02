@@ -238,38 +238,6 @@ class Controller {
         $sftp_deployer->upload_files( $processed_site_path );
     }
 
-    /*
-     * Naive encypting/decrypting
-     *
-     */
-    public static function encrypt_decrypt( $action, $string ) {
-        $output = false;
-        $encrypt_method = 'AES-256-CBC';
-
-        $secret_key =
-            defined( 'AUTH_KEY' ) ?
-            constant( 'AUTH_KEY' ) :
-            'LC>_cVZv34+W.P&_8d|ejfr]d31h)J?z5n(LB6iY=;P@?5/qzJSyB3qctr,.D$[L';
-
-        $secret_iv =
-            defined( 'AUTH_SALT' ) ?
-            constant( 'AUTH_SALT' ) :
-            'ec64SSHB{8|AA_ThIIlm:PD(Z!qga!/Dwll 4|i.?UkC§NNO}z?{Qr/q.KpH55K9';
-
-        $key = hash( 'sha256', $secret_key );
-        $variate = substr( hash( 'sha256', $secret_iv ), 0, 16 );
-
-        if ( $action == 'encrypt' ) {
-            $output = openssl_encrypt( $string, $encrypt_method, $key, 0, $variate );
-            $output = base64_encode( $output );
-        } elseif ( $action == 'decrypt' ) {
-            $output =
-                openssl_decrypt( base64_decode( $string ), $encrypt_method, $key, 0, $variate );
-        }
-
-        return $output;
-    }
-
     public static function activate_for_single_site() : void {
         error_log( 'activating WP2Static sFTP Add-on' );
     }
@@ -365,7 +333,7 @@ class Controller {
 
         $passphrase =
             $_POST['passphrase'] ?
-            self::encrypt_decrypt(
+            \WP2Static\Controller::encrypt_decrypt(
                 'encrypt',
                 sanitize_text_field( $_POST['passphrase'] )
             ) : '';
@@ -378,7 +346,7 @@ class Controller {
 
         $password =
             $_POST['password'] ?
-            self::encrypt_decrypt(
+            \WP2Static\Controller::encrypt_decrypt(
                 'encrypt',
                 sanitize_text_field( $_POST['password'] )
             ) : '';
