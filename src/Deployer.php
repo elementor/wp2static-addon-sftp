@@ -23,7 +23,7 @@ class Deployer {
             Controller::getValue( 'password' )
         ) {
             $username = Controller::getValue( 'username' );
-            $password = \WP2Static\Controller::encrypt_decrypt(
+            $password = \WP2Static\CoreOptions::encrypt_decrypt(
                 'decrypt',
                 Controller::getValue( 'password' )
             );

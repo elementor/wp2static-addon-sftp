@@ -3,26 +3,7 @@
 namespace WP2StaticSFTP;
 
 class Controller {
-    public function run() {
-        // initialize options DB
-        global $wpdb;
-
-        $table_name = $wpdb->prefix . 'wp2static_addon_sftp_options';
-
-        $charset_collate = $wpdb->get_charset_collate();
-
-        $sql = "CREATE TABLE $table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            name VARCHAR(255) NOT NULL,
-            value VARCHAR(255) NOT NULL,
-            label VARCHAR(255) NULL,
-            description VARCHAR(255) NULL,
-            PRIMARY KEY  (id)
-        ) $charset_collate;";
-
-        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        dbDelta( $sql );
-
+    public function run() : void {
         $options = $this->getOptions();
 
         if ( ! isset( $options['host'] ) ) {
@@ -45,24 +26,12 @@ class Controller {
             1
         );
 
-        add_action(
-            'wp2static_post_deploy_trigger',
-            [ 'WP2StaticSFTP\Deployer', 'cloudfront_invalidate' ],
-            15,
-            1
-        );
-
         if ( defined( 'WP_CLI' ) ) {
             \WP_CLI::add_command(
                 'wp2static sftp',
                 [ 'WP2StaticSFTP\CLI', 'sftp' ]
             );
         }
-    }
-
-    // TODO: is this needed? confirm slashing of destination URLs...
-    public function modifyWordPressSiteURL( $site_url ) {
-        return rtrim( $site_url, '/' );
     }
 
     /**
@@ -209,8 +178,10 @@ class Controller {
 
     /**
      * Save options
+     *
+     * @param mixed $value option value to save
      */
-    public static function saveOption( $name, $value ) : void {
+    public static function saveOption( string $name, $value ) : void {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'wp2static_addon_sftp_options';
@@ -231,7 +202,7 @@ class Controller {
     }
 
 
-    public function deploy( $processed_site_path ) {
+    public function deploy( string $processed_site_path ) : void {
         \WP2Static\WsLog::l( 'sFTP Addon deploying' );
 
         $sftp_deployer = new Deployer();
@@ -239,15 +210,31 @@ class Controller {
     }
 
     public static function activate_for_single_site() : void {
-        error_log( 'activating WP2Static sFTP Add-on' );
+        // initialize options DB
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'wp2static_addon_sftp_options';
+
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            value VARCHAR(255) NOT NULL,
+            label VARCHAR(255) NULL,
+            description VARCHAR(255) NULL,
+            PRIMARY KEY  (id)
+        ) $charset_collate;";
+
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta( $sql );
+
     }
 
     public static function deactivate_for_single_site() : void {
-        error_log( 'deactivating WP2Static sFTP Add-on, maintaining options' );
     }
 
     public static function deactivate( bool $network_wide = null ) : void {
-        error_log( 'deactivating WP2Static sFTP Add-on' );
         if ( $network_wide ) {
             global $wpdb;
 
@@ -273,7 +260,6 @@ class Controller {
     }
 
     public static function activate( bool $network_wide = null ) : void {
-        error_log( 'activating sftp addon' );
         if ( $network_wide ) {
             global $wpdb;
 
@@ -298,13 +284,19 @@ class Controller {
         }
     }
 
-    public static function addSubmenuPage( $submenu_pages ) {
+    /**
+     * Add WP2Static submenu
+     *
+     * @param mixed[] $submenu_pages array of submenu pages
+     * @return mixed[] array of submenu pages
+     */
+    public static function addSubmenuPage( $submenu_pages ) : array {
         $submenu_pages['sftp'] = [ 'WP2StaticSFTP\Controller', 'renderSFTPPage' ];
 
         return $submenu_pages;
     }
 
-    public static function saveOptionsFromUI() {
+    public static function saveOptionsFromUI() : void {
         check_admin_referer( 'wp2static-sftp-options' );
 
         global $wpdb;
@@ -333,7 +325,7 @@ class Controller {
 
         $passphrase =
             $_POST['passphrase'] ?
-            \WP2Static\Controller::encrypt_decrypt(
+            \WP2Static\CoreOptions::encrypt_decrypt(
                 'encrypt',
                 sanitize_text_field( $_POST['passphrase'] )
             ) : '';
@@ -346,7 +338,7 @@ class Controller {
 
         $password =
             $_POST['password'] ?
-            \WP2Static\Controller::encrypt_decrypt(
+            \WP2Static\CoreOptions::encrypt_decrypt(
                 'encrypt',
                 sanitize_text_field( $_POST['password'] )
             ) : '';
