@@ -4,14 +4,6 @@ namespace WP2StaticSFTP;
 
 class Controller {
     public function run() : void {
-        $options = $this->getOptions();
-
-        if ( ! isset( $options['host'] ) ) {
-            $this->seedOptions();
-        }
-
-        add_filter( 'wp2static_add_menu_items', [ 'WP2StaticSFTP\Controller', 'addSubmenuPage' ] );
-
         add_action(
             'admin_post_wp2static_sftp_save_options',
             [ $this, 'saveOptionsFromUI' ],
@@ -25,6 +17,8 @@ class Controller {
             15,
             1
         );
+
+        add_filter( 'wp2static_add_menu_items', [ 'WP2StaticSFTP\Controller', 'addSubmenuPage' ] );
 
         if ( defined( 'WP_CLI' ) ) {
             \WP_CLI::add_command(
@@ -229,6 +223,11 @@ class Controller {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta( $sql );
 
+        $options = self::getOptions();
+
+        if ( ! isset( $options['host'] ) ) {
+            self::seedOptions();
+        }
     }
 
     public static function deactivate_for_single_site() : void {
